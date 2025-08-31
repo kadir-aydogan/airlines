@@ -1,0 +1,12 @@
+
+# modellerde değişiklik yapınca:
+
+python manage.py makemigrations
+python manage.py migrate
+
+# venv açmak için:
+    # cmd
+    venv\Scripts\activate
+
+    # git bash
+    source venv/Scripts/activate

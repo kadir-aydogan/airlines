@@ -1,0 +1,25 @@
+migrate:
+python manage.py makemigrations +++ migrate
+
+venv cmd: venv\Scripts\activate
+venv powershell: venv\Scripts\Activate.ps1
+venv gitbash: source venv/Scripts/activate
+
+type hint: param:type  -> return_type (opsiyonel)
+
+orm __lt: küçük
+orm __lte: küçük eşit
+orm __gt: büyük
+orm __gte: büyük eşit
+orm __icontains: like case-insensitive
+orm __in: SQL IN (...)
+orm __range: between
+
+ValidationError({...}): field bazlı hata mesajı
+
+* param: sadece keyword argüman geçilir
+**kwargs: değişken sayıda keyword argüman toplar.
+
+bu model'den bir objeye çevireceğin zaman iyi:
+class Meta:
+    model = Airplane
