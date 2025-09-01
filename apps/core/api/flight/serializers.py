@@ -1,11 +1,12 @@
+from django.utils import timezone
 from rest_framework import serializers
 
+from apps.core.api.airplanes.serializers import AirplaneReadSerializer
 from apps.core.models import Flight, Airplane
-
 from apps.core.services.flight_services import FlightCreateInput, FlightUpdateInput
-from django.utils import timezone
 
-class FlightListSerializer(serializers.ModelSerializer):
+
+class FlightReadSerializer(serializers.ModelSerializer):
 
     airplane_id = serializers.IntegerField(source="airplane.id", read_only=True)
 
@@ -103,4 +104,19 @@ class FlightUpdateSerializer(serializers.Serializer):
             departure_time=v["departure_time"],
             arrival_time=v["arrival_time"],
             airplane_id=v["airplane"].id,
+        )
+class FlightDetailSerializer(serializers.ModelSerializer):
+    airplane = AirplaneReadSerializer(read_only=True)
+
+    class Meta:
+        model = Flight
+        fields = (
+            "id",
+            "flight_number",
+            "airplane_id",
+            "departure",
+            "destination",
+            "departure_time",
+            "arrival_time",
+            "airplane",
         )

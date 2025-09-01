@@ -4,9 +4,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import status
 
-from apps.core.api.airplanes.serializers import AirplaneCreateSerializer, AirplaneListSerializer, \
+from apps.core.api.airplanes.serializers import AirplaneCreateSerializer, AirplaneReadSerializer, \
     AirplaneQuerySerializer, AirplaneUpdateSerializer, AirplaneDetailSerializer
-from apps.core.api.flight.serializers import FlightsQuerySerializer, FlightListSerializer
+from apps.core.api.flight.serializers import FlightsQuerySerializer, FlightReadSerializer
 from apps.core.api.pagination import DefaultPagination
 from apps.core.models import Airplane
 from apps.core.selectors import list_airplanes
@@ -26,6 +26,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         base = (
             Airplane.objects
             .only("id", "tail_number", "model", "capacity", "production_year", "status")
+            .filter(deleted=False)
             .order_by("id")
         )
 
@@ -44,7 +45,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             return AirplaneUpdateSerializer
         elif self.action == "retrieve":
             return AirplaneDetailSerializer
-        return AirplaneListSerializer
+        return AirplaneReadSerializer
 
 
     def perform_create(self, create_serializer: AirplaneCreateSerializer):
@@ -76,7 +77,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         flights_qs = list_flights(**qp.validated_data, airplane_id=airplane.id)
 
         airplane_data = self.get_serializer(airplane).data
-        flights_data = FlightListSerializer(flights_qs, many=True).data
+        flights_data = FlightReadSerializer(flights_qs, many=True).data
 
         return Response({
             **airplane_data,

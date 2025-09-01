@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from apps.core.api.flight.serializers import FlightListSerializer
+from apps.core.api.flight.serializers import FlightReadSerializer
 from apps.core.models import Reservation, Flight
-from apps.core.services.reservation_services import make_reservation, MakeReservationInput, UpdateReservationInput
+from apps.core.services.reservation_services import MakeReservationInput, UpdateReservationInput
 
 
-class ReservationListSerializer(serializers.ModelSerializer):
+class ReservationReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = (
@@ -76,13 +76,14 @@ class ReservationsQuerySerializer(serializers.Serializer):
     passenger_email = serializers.CharField(required=False, allow_blank=True)
     passenger_name = serializers.CharField(required=False, allow_blank=True)
     flight_id = serializers.IntegerField(required=False)
+    reservation_code = serializers.CharField(required=False, allow_blank=True)
     ordering = serializers.ChoiceField(
         required = False,
         choices = ["id", "-id"]
     )
 
 class ReservationDetailSerializer(serializers.ModelSerializer):
-    flight = FlightListSerializer(read_only=True)
+    flight = FlightReadSerializer(read_only=True)
 
     class Meta:
         model = Reservation

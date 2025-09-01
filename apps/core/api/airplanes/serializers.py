@@ -56,7 +56,7 @@ class AirplaneUpdateSerializer(serializers.Serializer):
     def to_input(self) -> AirplaneUpdateInput:
         return AirplaneUpdateInput(**self.validated_data)
 
-class AirplaneListSerializer(serializers.ModelSerializer):
+class AirplaneReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airplane
         fields = ("id", "tail_number", "model", "capacity", "production_year", "status")

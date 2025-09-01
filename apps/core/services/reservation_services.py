@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from apps.core.models import Flight, Reservation
 from apps.core.selectors.flight_selector import list_flights, get_flight
 from apps.core.services.flight_services import check_if_flight_is_passed
+from apps.notifications.dispatcher import publish_event
 from apps.notifications.tasks import send_reservation_email_task
 
 THRESHOLD = 60
@@ -52,7 +53,15 @@ def make_reservation(inp: MakeReservationInput) -> Reservation:
         res.full_clean()
         res.save()
 
-        transaction.on_commit(lambda: send_reservation_email_task.delay(res.id))
+        payload = {
+            "passenger_email": res.passenger_email,
+            "passenger_name": res.passenger_name,
+            "flight_id": flight.id,
+            "departure": flight.departure,
+            "departure_time": flight.departure_time.isoformat(),
+        }
+
+        publish_event("reservation.booked", payload)
 
         return res
 
