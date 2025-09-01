@@ -1,7 +1,6 @@
 from django.db import models
 import uuid
-
-from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from .flight import Flight
 

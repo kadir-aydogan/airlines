@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import status
 
+from apps.common.drf import BaseResponseJSONRenderer, base_response_exception_handler
 from apps.core.api.airplanes.serializers import AirplaneCreateSerializer, AirplaneReadSerializer, \
     AirplaneQuerySerializer, AirplaneUpdateSerializer, AirplaneDetailSerializer
 from apps.core.api.flight.serializers import FlightsQuerySerializer, FlightReadSerializer
@@ -16,6 +17,7 @@ from apps.core.services.airplane_services import update_airplane, soft_delete_ai
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
+    renderer_classes = [BaseResponseJSONRenderer]
 
     permission_classes = [AllowAny]
     pagination_class = DefaultPagination
@@ -83,5 +85,9 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             **airplane_data,
             "flights": flights_data
         })
+
+    def handle_exception(self, exc):
+        resp = base_response_exception_handler(exc, self.get_exception_handler_context())
+        return resp or super().handle_exception(exc)
 
 

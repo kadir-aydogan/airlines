@@ -1,6 +1,8 @@
 from dataclasses import dataclass, asdict
 from datetime import timedelta
+from typing import Optional
 
+from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from apps.core.models import Flight
@@ -53,6 +55,11 @@ def create_flight(inp: FlightCreateInput) -> Flight:
     if check_conflict(airplane.id, inp.departure_time, inp.arrival_time):
         raise ValidationError({"airplane_id": "This airplane has another flight within ±1h window."})
 
+    exists = Flight.objects.filter(flight_number=inp.flight_number).exists()
+
+    if exists:
+        raise ValidationError({"flight_number": "Flight with number " + inp.flight_number +" already exists."})
+
     flight = Flight(
         airplane=airplane,
         flight_number=inp.flight_number,
@@ -69,36 +76,50 @@ def create_flight(inp: FlightCreateInput) -> Flight:
 
 @dataclass(frozen=True)
 class FlightUpdateInput:
-    flight_number: str
-    departure: str
-    destination: str
-    departure_time: timezone.datetime
-    arrival_time: timezone.datetime
-    airplane_id: int
+    flight_number: Optional[str]
+    departure: Optional[str]
+    destination: Optional[str]
+    departure_time: Optional[timezone.datetime]
+    arrival_time: Optional[timezone.datetime]
+    airplane_id: Optional[int]
 
+@transaction.atomic
 def update_flight(flight: Flight, inp: FlightUpdateInput) -> Flight:
-    
     changes = {k: v for k, v in asdict(inp).items() if v is not None}
-    
     if not changes:
         return flight
+
     for field, value in changes.items():
         setattr(flight, field, value)
 
+    effective_airplane_id = flight.airplane_id
+
     try:
-        airplane = Airplane.objects.get(pk=inp.airplane_id, deleted=False)
+        Airplane.objects.get(pk=effective_airplane_id, deleted=False)
     except Airplane.DoesNotExist:
-        raise ValidationError(f"Airplane {inp.airplane_id} does not exist")
+        raise ValidationError(f"Airplane {effective_airplane_id} does not exist")
 
-    has_conflict = check_conflict_with_existing_flight(airplane.id, flight.departure_time, flight.arrival_time, flight.id)
-
+    has_conflict = check_conflict_with_existing_flight(
+        effective_airplane_id,
+        flight.departure_time,
+        flight.arrival_time,
+        flight.id,
+    )
     if has_conflict:
         raise ValidationError({"airplane_id": "This airplane has another flight within ±1h window."})
 
     flight.full_clean()
-    flight.save(update_fields=list(changes.keys()))
 
+    update_fields = list(changes.keys())
+    if "airplane_id" in update_fields:
+        update_fields[update_fields.index("airplane_id")] = "airplane"
+
+    flight.save(update_fields=update_fields)
     return flight
+
+def check_if_flight_is_started(flight_id: int) -> bool:
+    now = timezone.now()
+    return Flight.objects.filter(pk=flight_id, departure_time__lte=now).exists()
 
 def check_if_flight_is_passed(flight_id: int) -> bool:
     now = timezone.now()

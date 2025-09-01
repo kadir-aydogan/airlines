@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from apps.common.drf import BaseResponseJSONRenderer, base_response_exception_handler
 from apps.core.api.pagination import DefaultPagination
 from apps.core.api.reservation.serializers import ReservationReadSerializer, ReservationCreateSerializer, \
     ReservationsQuerySerializer, ReservationUpdateSerializer, ReservationDetailSerializer
@@ -11,6 +12,7 @@ from apps.core.services.reservation_services import make_reservation, update_res
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
+    renderer_classes = [BaseResponseJSONRenderer]
     permission_classes = [AllowAny]
     pagination_class = DefaultPagination
 
@@ -52,6 +54,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         soft_delete_reservation(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def handle_exception(self, exc):
+        resp = base_response_exception_handler(exc, self.get_exception_handler_context())
+        return resp or super().handle_exception(exc)
 
 
 

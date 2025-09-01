@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.common.drf import BaseResponseJSONRenderer, base_response_exception_handler
 from apps.core.api.flight.serializers import FlightCreateSerializer, FlightReadSerializer, FlightsQuerySerializer, \
     FlightUpdateSerializer
 from apps.core.api.pagination import DefaultPagination
@@ -13,6 +14,7 @@ from apps.core.services.flight_services import create_flight, update_flight, sof
 
 
 class FlightViewSet(viewsets.ModelViewSet):
+    renderer_classes = [BaseResponseJSONRenderer]
     permission_classes = [permissions.AllowAny]
     pagination_class = DefaultPagination
 
@@ -69,3 +71,8 @@ class FlightViewSet(viewsets.ModelViewSet):
             **flight_data,
             "reservations": ser.data,
         })
+
+    def handle_exception(self, exc):
+        print("Exception in API:", repr(exc))
+        resp = base_response_exception_handler(exc, self.get_exception_handler_context())
+        return resp or super().handle_exception(exc)

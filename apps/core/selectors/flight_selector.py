@@ -55,7 +55,7 @@ def list_flights(
         if arrival_time_max:
             qs = qs.filter(arrival_time__lte=arrival_time_max)
 
-    if deleted:
+    if deleted is not None:
         qs = qs.filter(deleted=False)
 
     if search:

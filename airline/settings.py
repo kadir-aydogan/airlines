@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.core',
     'apps.notifications',
+    'apps.common',
 ]
 
 MIDDLEWARE = [
@@ -75,14 +76,17 @@ TEMPLATES = [
     },
 ]
 
+from apps.common.drf.exception_renderer import base_response_exception_handler
+
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.api.pagination.DefaultPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
+    "EXCEPTION_HANDLER": "apps.common.drf.exception_renderer.base_response_exception_handler",
 }
 
 WSGI_APPLICATION = 'airline.wsgi.application'

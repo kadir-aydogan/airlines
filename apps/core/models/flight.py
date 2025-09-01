@@ -1,5 +1,5 @@
 from django.db import models
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 from .airplane import Airplane
 
@@ -18,7 +18,6 @@ class Flight(models.Model):
         indexes = [models.Index(fields=['flight_number']), ]
 
     def clean(self):
-
         if self.arrival_time <= self.departure_time:
             raise ValidationError({"arrival_time": "Arrival must be after departure."})
 

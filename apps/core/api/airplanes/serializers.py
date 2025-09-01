@@ -53,6 +53,24 @@ class AirplaneUpdateSerializer(serializers.Serializer):
     production_year = serializers.IntegerField(required=False)
     status = serializers.BooleanField(required=False, default=True)
 
+    def validate_tail_number(self, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise serializers.ValidationError("Tail number cannot be blank.")
+        return v
+
+    def validate_model(self, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise serializers.ValidationError("Model cannot be blank.")
+        return v
+
+    def validate_production_year(self, value: int) -> int:
+        now_year = timezone.now().year
+        if value < 1950 or value > now_year:
+            raise serializers.ValidationError(f"Must be between 1950 and {now_year}")
+        return value
+
     def to_input(self) -> AirplaneUpdateInput:
         return AirplaneUpdateInput(**self.validated_data)
 

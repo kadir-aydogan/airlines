@@ -47,9 +47,8 @@ class ReservationCreateSerializer(serializers.Serializer):
 class ReservationUpdateSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
 
-    passenger_name  = serializers.CharField(max_length=40)
-    passenger_email = serializers.EmailField(max_length=254)
-    flight          = serializers.PrimaryKeyRelatedField(queryset=Flight.objects.only("id"))
+    passenger_name  = serializers.CharField(required=False, max_length=40)
+    passenger_email = serializers.EmailField(required=False, max_length=254)
     status          = serializers.BooleanField(required=False, default=True)
 
     def validate_passenger_name(self, v):
@@ -64,9 +63,8 @@ class ReservationUpdateSerializer(serializers.Serializer):
     def to_input(self) -> UpdateReservationInput:
         v = self.validated_data
         return UpdateReservationInput(
-            passenger_name=v["passenger_name"],
-            passenger_email=v["passenger_email"],
-            flight_id=v["flight"].id,
+            passenger_name=v.get("passenger_name"),
+            passenger_email=v.get("passenger_email"),
             status=v.get("status", True),
         )
 
