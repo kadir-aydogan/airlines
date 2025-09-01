@@ -10,3 +10,9 @@ python manage.py migrate
 
     # git bash
     source venv/Scripts/activate
+
+# celery çalıştır:
+celery -A airline worker -l info
+
+local
+python manage.py runserver

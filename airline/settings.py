@@ -27,6 +27,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+# celery
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
+
+# dev için konsola bastık.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "kadir@aydogan.com"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -94,6 +102,9 @@ DATABASES = {
     }
 }
 
+RESERVATION_BOOKED_HANDLERS = [
+    "apps.notifications.tasks.send_reservation_email_task",
+]
 
 
 # DATABASES = {

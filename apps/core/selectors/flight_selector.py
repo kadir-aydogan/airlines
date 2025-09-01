@@ -7,10 +7,9 @@ from apps.core.models import Flight
 def get_flight(
         *,
         flight_id: int,
-        status: Optional[bool] = True,
         deleted: Optional[bool] = False) -> Optional[Flight]:
 
-    return Flight.objects.select_related("airplane").get(id=flight_id, status=status, deleted=deleted)
+    return Flight.objects.select_related("airplane").get(id=flight_id, deleted=deleted)
 
 
 def list_flights(

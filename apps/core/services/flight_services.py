@@ -96,7 +96,6 @@ def update_flight(flight: Flight, inp: FlightUpdateInput) -> Flight:
         raise ValidationError({"airplane_id": "This airplane has another flight within ±1h window."})
 
     flight.full_clean()
-
     flight.save(update_fields=list(changes.keys()))
 
     return flight
